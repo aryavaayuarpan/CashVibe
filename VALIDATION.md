@@ -23,8 +23,19 @@ The Docker build used a temporary BuildKit secret to trust this test environment
 - Overall and category budgets do not double count limits in SpendGenie summaries.
 - SpendGenie proposals do not mutate records before explicit UI confirmation. Mock provider checks verify user-scoped tool grounding and honest fallback after provider errors.
 
-## Still requires deployment verification
+## Verified live deployment
 
-Public Render hosting, the user's actual Supabase database, and live Groq/Ollama inference have not been verified in this workspace. No provider key was supplied. Local insights works without a key and is labeled accordingly. Ollama inference could not be tested within the available disk capacity.
+- Live URL: https://cashvibe-ckpv.onrender.com
+- Render service: Docker web service on the Free compute plan; persistent data is stored in Supabase on a verified Free organization.
+- Application source commit: `b758f0417af4b6cadbdafa641aa2ae94f3daeff2`.
+- GitHub Actions passed the full test suite, Compose validation, and production Docker build for that commit: https://github.com/aryavaayuarpan/CashVibe/actions/runs/43722982892
+- Production acceptance passed account creation, recovery-key gates, login, income/expense recording, budgets, personal-record isolation, group creation/joining, shared expense creation and editing across two independent browser sessions, and settlements.
+- A shared expense appeared on the second account at 600 and updated there automatically after an edit to 800.
+- SpendGenie used the real Groq provider with `openai/gpt-oss-20b`; the production UI showed Groq AI, proposed an expense, and saved it only after confirmation. A separate live-provider tool check returned the exact recorded 180 total from synthetic records without inventing data.
+- All four temporary QA accounts and their dependent group/financial records were removed after the checks.
 
-After cloud deployment, repeat the two-device procedure in README.md, check persistence after redeployment, and test SpendGenie with the configured provider. Free hosting can sleep or pause; background push notifications are not part of this release.
+The managed test computer's Chromium did not trust its HTTPS inspection CA directly. Production browser tests used a loopback-only relay to the fixed Render host; that relay validated certificates and hostnames for every upstream HTTPS/WebSocket connection. No TLS verification was disabled. Test credentials stayed in memory and production screenshots stayed outside the repository.
+
+## Operating limits
+
+Render Free can sleep after inactivity; Supabase Free can pause after extended inactivity. Groq Free has rate limits. Shared changes refresh while the relevant page is open; background push notifications are not included. Keep recovery keys private and back up important records.

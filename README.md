@@ -2,7 +2,9 @@
 
 **Student money, in sync.** A Docker-ready Streamlit expense tracker with personal records, monthly budgets, shared group expenses, settlements, financial insights, and SpendGenie.
 
-This repository is the application and deployment configuration. A local server or a passing build is **not** a permanent public deployment. To publish it, complete the account and secret setup below and verify the live Render URL. No hosting credentials or API keys are bundled.
+**Live application: [cashvibe-ckpv.onrender.com](https://cashvibe-ckpv.onrender.com)**
+
+The hosted product uses Render Free, persistent Supabase Free PostgreSQL, and Groq-backed SpendGenie. Create your own account and save its recovery key. Shared expenses update across open devices. The source below also supports local Docker use and deployment to your own accounts; no hosting credentials or API keys are bundled.
 
 ![CashVibe dashboard with synthetic test records](docs/dashboard.png)
 
