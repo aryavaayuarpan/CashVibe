@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      CASHVIBE_DB_PATH: ${{ runner.temp }}/cashvibe-ci.db
+      CASHVIBE_DB_PATH: data/cashvibe-ci.db
       CASHVIBE_TIMEZONE: Asia/Kolkata
       REQUIRE_POSTGRES: "false"
     steps:
