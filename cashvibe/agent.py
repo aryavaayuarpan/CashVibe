@@ -335,12 +335,13 @@ class Agent:
     def _chat_request(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         if self.groq_key:
             url = "https://api.groq.com/openai/v1/chat/completions"
-            model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+            model = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
             headers = {"Authorization": "Bearer " + self.groq_key, "Content-Type": "application/json"}
         else:
             url = self.ollama_base + "/v1/chat/completions"
             model = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
             headers = {"Content-Type": "application/json"}
+        headers["User-Agent"] = "CashVibe/1.0"
         payload = {"model": model, "messages": messages, "tools": self._tool_definitions(),
                    "tool_choice": "auto", "temperature": 0.15, "max_tokens": 900}
         req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers, method="POST")

@@ -68,7 +68,7 @@ Create a repository and upload the contents of this folder, including `Dockerfil
 1. Sign into [Render](https://dashboard.render.com/) with access to that repository.
 2. Choose **New → Blueprint**, select the repository, and apply `render.yaml`. Confirm the service's plan is **Free**.
 3. Enter `DATABASE_URL` when prompted. The Blueprint uses Docker, port `8501`, and health path `/_stcore/health`.
-4. Optional: under **Environment**, add `GROQ_API_KEY` from your own [Groq console](https://console.groq.com/keys). Its value must be a server secret. `GROQ_MODEL` defaults to `llama-3.3-70b-versatile`; update it if your provider changes model availability.
+4. Optional: under **Environment**, add `GROQ_API_KEY` from your own [Groq console](https://console.groq.com/keys). Its value must be a server secret. `GROQ_MODEL` defaults to `openai/gpt-oss-20b`; update it if your provider changes model availability.
 5. Deploy and wait for **Live**. Open the literal HTTPS URL returned by Render, register, and save your recovery code.
 
 For a manual Render setup, choose **New → Web Service → Git repository → Docker → Free**, set port `8501`, `DATABASE_URL`, and `REQUIRE_POSTGRES=true`, then use health check `/_stcore/health`. Do not use an ephemeral local SQLite file for public hosting.
@@ -157,7 +157,7 @@ CASHVIBE_TIMEZONE = "Asia/Kolkata"
 CASHVIBE_SYNC_SECONDS = "5"
 # Optional:
 # GROQ_API_KEY = "your-private-key"
-# GROQ_MODEL = "llama-3.3-70b-versatile"
+# GROQ_MODEL = "openai/gpt-oss-20b"
 ```
 
 Use PostgreSQL here too; local app files are not a reliable persistent database. Community Cloud has its own resource and inactivity limits. Docker remains available for local use and migration to another host.
@@ -183,7 +183,7 @@ Use PostgreSQL here too; local app files are not a reliable persistent database.
 | `CASHVIBE_TIMEZONE` | `Asia/Kolkata` | Dates and month boundaries. |
 | `CASHVIBE_SYNC_SECONDS` | `5` | Active-view refresh interval. |
 | `GROQ_API_KEY` | empty | Enables hosted SpendGenie language model. |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Provider model identifier. |
+| `GROQ_MODEL` | `openai/gpt-oss-20b` | Provider model identifier. |
 | `OLLAMA_BASE_URL` | empty | Optional trusted Ollama server root URL. |
 | `OLLAMA_MODEL` | `qwen2.5:3b` | Local model identifier. |
 
