@@ -122,10 +122,11 @@ def authentication():
                         raise ValueError("The passwords don't match.")
                     if not accepted:
                         raise ValueError("Please acknowledge who can see your records.")
-                    result = store.register(name, email, password)
+                    result = store.register(name, email, password, issue_recovery_code=False)
                     st.session_state["user"] = result["user"]
-                    st.session_state["recovery_code"] = result["recovery_code"]
-                    st.session_state["recovery_email"] = result["user"]["email"]
+                    st.session_state.pop("recovery_code", None)
+                    st.session_state.pop("recovery_email", None)
+                    st.session_state["navigation"] = "Overview"
                     st.rerun()
                 except (ValueError, PermissionError, SQLAlchemyError) as exc:
                     error_message(exc)
@@ -680,7 +681,7 @@ def settings_page(month):
         st.subheader(user["name"])
         st.write(user["email"])
         st.caption(f"Currency: {CURRENCY} · Personal records are visible only to you. Shared expenses and group activity are visible to the group's members.")
-        st.write("Keep the recovery key you saved when signing up. You can reset your password from the sign-in page with that key; a successful reset signs out existing sessions and replaces the key.")
+        st.write("Your account details are saved securely for future sign-ins. Use your email and password to sign in. Previously issued recovery keys still work through Recover access.")
     with st.container(border=True):
         st.subheader("Take your records with you")
         all_rows = ledger(store, uid)

@@ -322,11 +322,11 @@ class Store:
         conn.execute(insert(activity).values(id=_id(), group_id=group_id, actor_id=user_id,
                                             action=action, description=description[:240], created_at=_now()))
 
-    def register(self, name: str, email: str, password: str) -> dict:
+    def register(self, name: str, email: str, password: str, *, issue_recovery_code: bool = True) -> dict:
         name, email, password = _str(name, "Name", 80), _email(email), _password(password)
-        code = secrets.token_urlsafe(24)
+        code = secrets.token_urlsafe(24) if issue_recovery_code else None
         row = dict(id=_id(), name=name, email=email, password_hash=_hash_password(password),
-                   recovery_hash=_hash_code(code), auth_version=1, created_at=_now())
+                   recovery_hash=_hash_code(code) if code else secrets.token_hex(32), auth_version=1, created_at=_now())
         try:
             with self._write() as conn:
                 conn.execute(insert(users).values(**row))

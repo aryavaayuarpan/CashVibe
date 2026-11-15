@@ -4,7 +4,7 @@
 
 **Live application: [cashvibe-ckpv.onrender.com](https://cashvibe-ckpv.onrender.com)**
 
-The hosted product uses Render Free, persistent Supabase Free PostgreSQL, and Groq-backed SpendGenie. Create your own account and save its recovery key. Shared expenses update across open devices. The source below also supports local Docker use and deployment to your own accounts; no hosting credentials or API keys are bundled.
+The hosted product uses Render Free, persistent Supabase Free PostgreSQL, and Groq-backed SpendGenie. Create your own account to open the dashboard immediately. Shared expenses update across open devices. The source below also supports local Docker use and deployment to your own accounts; no hosting credentials or API keys are bundled.
 
 ![CashVibe dashboard with synthetic test records](docs/dashboard.png)
 
@@ -31,7 +31,7 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-On Windows PowerShell, replace `cp` with `Copy-Item`. Open **http://localhost:8501** and create your account. There are no default credentials or sample records. Save the recovery code shown when you register; it replaces email-based password recovery.
+On Windows PowerShell, replace `cp` with `Copy-Item`. Open **http://localhost:8501** and create your account. There are no default credentials or sample records. Signup opens the dashboard immediately; your saved email and password work for future sign-ins.
 
 Data is stored in the `cashvibe_data` named volume. `docker compose down` preserves it; `docker compose down -v` **deletes it**. Keep a backup before removing volumes, reinstalling Docker, or moving machines.
 
@@ -171,7 +171,7 @@ Use PostgreSQL here too; local app files are not a reliable persistent database.
 - Invite codes grant group membership. Share them privately; rotate a code if it is exposed. A rotated code does not remove existing participants.
 - Shared updates are polling-based while the relevant page is open. The app does not promise push notifications when closed or background mobile synchronization.
 - Settlements record money that participants have transferred separately. CashVibe does not move money.
-- Save your recovery code privately. There is no automatic email recovery or email verification in this version.
+- Signup does not generate or display a recovery code. Previously issued keys remain supported. There is no automatic email recovery or email verification in this version.
 - Keep database credentials server-side, restrict access to hosting dashboards, retain HTTPS, and export/backup records regularly. Financial insights are descriptive and estimated from recorded data.
 
 ## Configuration

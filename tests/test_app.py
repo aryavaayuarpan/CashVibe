@@ -49,15 +49,12 @@ def signup(at, email="alice@app.test"):
     at.checkbox[0].check()
     labeled(at.button, "Create my account →").click().run()
     clean(at)
-    code = at.session_state["recovery_code"]
-    assert code
-    at.checkbox(key="saved_recovery").check().run()
-    at.button(key="continue_recovery").click().run()
-    clean(at)
-    return at.session_state["user"], code
+    assert "recovery_code" not in at.session_state
+    assert at.radio(key="navigation").value == "Overview"
+    return at.session_state["user"], None
 
 
-def test_signup_recovery_key_gate_logout_invalid_and_valid_login(app):
+def test_signup_opens_dashboard_and_saved_credentials_allow_future_login(app):
     at, persistence = app
     user, recovery = signup(at)
     assert user["email"] == "alice@app.test"
@@ -130,7 +127,11 @@ def test_open_group_view_reads_updates_written_by_another_participant(app):
 
 def test_password_recovery_revokes_existing_app_session(app):
     at, persistence = app
-    user, recovery = signup(at)
+    registered = persistence.register("Legacy user", "legacy@app.test", "Correct Horse 2026!")
+    user, recovery = registered["user"], registered["recovery_code"]
+    at.text_input(key="login_email").set_value(user["email"])
+    at.text_input(key="login_password").set_value("Correct Horse 2026!")
+    labeled(at.button, "Sign in →").click().run()
     persistence.recover(user["email"], recovery, "A New Passphrase 2026!")
     at.run()
     clean(at)
