@@ -1,0 +1,26 @@
+# Connect this repository using Render > New > Blueprint.
+# Enter DATABASE_URL and optional GROQ_API_KEY securely in Render's dashboard.
+services:
+  - type: web
+    name: cashvibe
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /_stcore/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "8501"
+      - key: DATABASE_URL
+        sync: false
+      - key: REQUIRE_POSTGRES
+        value: "true"
+      - key: CASHVIBE_CURRENCY
+        value: INR
+      - key: CASHVIBE_TIMEZONE
+        value: Asia/Kolkata
+      - key: CASHVIBE_SYNC_SECONDS
+        value: "5"
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile

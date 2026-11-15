@@ -1,0 +1,29 @@
+services:
+  cashvibe:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-}
+      REQUIRE_POSTGRES: ${REQUIRE_POSTGRES:-false}
+      CASHVIBE_DB_PATH: /app/data/cashvibe.db
+      CASHVIBE_CURRENCY: ${CASHVIBE_CURRENCY:-INR}
+      CASHVIBE_TIMEZONE: ${CASHVIBE_TIMEZONE:-Asia/Kolkata}
+      CASHVIBE_SYNC_SECONDS: ${CASHVIBE_SYNC_SECONDS:-5}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+    volumes:
+      - cashvibe_data:/app/data
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:0.15.2
+    profiles: [local-ai]
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  cashvibe_data:
+  ollama_models:

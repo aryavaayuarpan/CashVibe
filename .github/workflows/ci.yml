@@ -1,0 +1,33 @@
+name: CashVibe checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CASHVIBE_DB_PATH: ${{ runner.temp }}/cashvibe-ci.db
+      CASHVIBE_TIMEZONE: Asia/Kolkata
+      REQUIRE_POSTGRES: "false"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Test application
+        run: python -m pytest -q
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+      - name: Build Docker image
+        run: docker build --tag cashvibe:ci .
