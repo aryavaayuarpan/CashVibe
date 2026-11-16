@@ -146,7 +146,7 @@ def render_personal_spendings(store,uid,month):
     st.write('Turn bank statements into a clear picture of your money: review, categorize, explore and ask SpendGenie.')
     notice=st.session_state.pop(key+'notice',None)
     if notice:st.success(notice)
-    upload_tab,analysis_tab=st.tabs(['Upload & convert','Spending analysis'])
+    upload_tab,analysis_tab=st.tabs(['Upload & convert','Spending analysis'],key=key+'tabs',on_change='rerun')
     with upload_tab:_upload(store,uid,key)
     with analysis_tab:
         statements=store.list_statements(uid)

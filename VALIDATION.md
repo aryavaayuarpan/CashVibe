@@ -47,3 +47,5 @@ Render Free can sleep after inactivity; Supabase Free can pause after extended i
 - SpendGenie statement-tool tests verify date filtering, account scope and removal of long numeric/VPA identifiers from descriptions.
 - Docker build succeeds with local Tesseract installed. The managed build uses its local proxy CA as a temporary BuildKit secret; production Dockerfile uses standard TLS trust. The local sandbox lacked space for a second container filesystem, so runtime browser checks use the same Python source environment; GitHub CI checks the production image build.
 - Parsing is bank-independent but layout-dependent. Review and completeness confirmation are mandatory. Unknown app attribution remains explicit; arbitrary bank layouts and OCR accuracy are not guaranteed.
+
+- Local Chromium end-to-end check passed PDF upload → reviewed CSV download → private saved analysis → matching ledger connection → SpendGenie statement summary. Explicit tab state preserves the analysis view across filter/connection reruns.
