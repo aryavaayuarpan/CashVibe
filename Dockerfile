@@ -9,7 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt && \
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache-dir -r requirements.txt && \
     groupadd --gid 1000 cashvibe && \
     useradd --uid 1000 --gid cashvibe --no-create-home --home-dir /app cashvibe && \
     mkdir -p /app/data && chown cashvibe:cashvibe /app /app/data

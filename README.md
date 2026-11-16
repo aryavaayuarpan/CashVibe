@@ -12,8 +12,9 @@ Screenshots use test records. New accounts start with an empty ledger. [Phone vi
 
 ## What is included
 
-- Register, sign in, sign out, and recover an account with a private recovery code.
+- Register and land on the dashboard; sign in later using your saved email and password. Legacy accounts with an existing recovery code can still recover access.
 - Record income and expenses; search, filter, edit, delete, and export personal history.
+- Personal spendings: PDF/CSV statement conversion, editable review, app and merchant categorization, monthly/day cash-flow charts, CSV exports, duplicate checks and optional ledger/shared-expense reconciliation.
 - Monthly category budgets with configurable warning thresholds and financial charts.
 - Invite-only groups, exact shared splits, participant balances, shared expense changes, and settlement records.
 - Shared records stored in one database; active pages poll for updates (five seconds by default).
@@ -71,7 +72,7 @@ Create a repository and upload the contents of this folder, including `Dockerfil
 2. Choose **New → Blueprint**, select the repository, and apply `render.yaml`. Confirm the service's plan is **Free**.
 3. Enter `DATABASE_URL` when prompted. The Blueprint uses Docker, port `8501`, and health path `/_stcore/health`.
 4. Optional: under **Environment**, add `GROQ_API_KEY` from your own [Groq console](https://console.groq.com/keys). Its value must be a server secret. `GROQ_MODEL` defaults to `openai/gpt-oss-20b`; update it if your provider changes model availability.
-5. Deploy and wait for **Live**. Open the literal HTTPS URL returned by Render, register, and save your recovery code.
+5. Deploy and wait for **Live**. Open the literal HTTPS URL returned by Render, register, and verify future sign-in with your email and password.
 
 For a manual Render setup, choose **New → Web Service → Git repository → Docker → Free**, set port `8501`, `DATABASE_URL`, and `REQUIRE_POSTGRES=true`, then use health check `/_stcore/health`. Do not use an ephemeral local SQLite file for public hosting.
 
@@ -199,3 +200,15 @@ Use PostgreSQL here too; local app files are not a reliable persistent database.
 - **Docker data permission error:** use the supplied named volume and uid `1000`. A manually bound host folder must be writable by that user.
 
 MIT licensed. See [LICENSE](LICENSE).
+
+## Personal spendings: bank statements
+
+Open **Personal spendings → Upload & convert**. Upload a PDF (including password-protected PDFs) or CSV. Enter the PDF password only in the password field. Convert, check every extracted row, correct suggested categories, **payment app** (PhonePe, Google Pay, Paytm, etc.) and **merchant platform** (Swiggy, Amazon, etc.), and save the reviewed statement. Download CSV before or after saving. No bank connection or paid bank API is required.
+
+The importer is bank-independent, but bank layouts vary and no parser guarantees every statement. Supported approaches include aligned debit/credit columns, explicit DR/CR amounts and balance-based direction checks. Ambiguous directions require review; failed CSV rows are reported. CSV manual column mapping handles different exports. Text PDFs support up to 50 pages; local English Tesseract OCR supports up to five scanned pages. Each upload is limited to 5 MB and 2,000 transactions. OCR and password failures have actionable errors. Import statements in the configured deployment currency; no currency conversion is performed.
+
+**Spending analysis** lets you select a statement, month and specific day, view money out/in by app, merchant spending, categories, daily cash flow and spending patterns. Internal transfers should be marked `transfer` so they remain cash flows without inflating spending. App attribution requires an explicit app name or user confirmation: `@ybl` or `@okaxis` alone cannot reliably identify an app. Suggested categories are rules, not definitive bank classifications.
+
+Imports default to **Statement only**, separate from ledger/budget totals. Choose **Add to ledger** in the preview or connect a saved row to an existing personal transaction or shared expense. Existing links require matching date, amount and direction; shared links also require that you paid the expense and belong to the group. Linking does not create another ledger entry. Exact file reimports are blocked; matching rows from overlapping imports are skipped unless explicitly marked distinct. Without a reliable bank reference, duplicate matching is conservative and should be reviewed. Statement deletion preserves linked ledger/group records.
+
+SpendGenie reads your saved normalized statement rows and app/merchant/category summaries using user-scoped tools. Ask, for example, “Analyze my bank statement for November 2026 by PhonePe and Paytm” or “What did my bank statement show on 2026-11-15?” Linked statement totals overlap ledger totals and must not be added together. Raw PDFs and PDF passwords are not stored in the database or sent to the AI provider; reviewed descriptions sent through AI tools redact long numerical identifiers and VPA/email strings. Original uploads remain in the current upload session until conversion/discard; persistent storage contains only reviewed transactions.

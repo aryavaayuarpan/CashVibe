@@ -26,6 +26,7 @@ for _key in ("DATABASE_URL", "REQUIRE_POSTGRES", "GROQ_API_KEY", "GROQ_MODEL", "
 
 from cashvibe.store import Store
 from cashvibe.agent import Agent
+from cashvibe.personal_spendings import render_personal_spendings
 from cashvibe.ui import (CATEGORIES, CURRENCY, SYMBOL, PALETTE, today, money, to_cents, equal_split,
                         percentage_split, ledger, totals, month_label, days_in_month, metric,
                         section, empty, category_chart, chart_style, transaction_frame, export_csv, debt_plan, inject_style)
@@ -698,7 +699,7 @@ def settings_page(month):
 
 with st.sidebar:
     st.markdown('<div class="cv-brand"><span class="cv-mark"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19L19 5M5 5h14v14" stroke="#09201b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Cash<span>Vibe</span></div><div class="cv-tag">Your money, in rhythm</div>', unsafe_allow_html=True)
-    page = st.radio("Workspace", ["Overview", "Transactions", "Budgets", "Groups", "Insights", "Savings goals", "SpendGenie", "Settings"], label_visibility="collapsed", key="navigation")
+    page = st.radio("Workspace", ["Overview", "Transactions", "Personal spendings", "Budgets", "Groups", "Insights", "Savings goals", "SpendGenie", "Settings"], label_visibility="collapsed", key="navigation")
     st.divider()
     selected_date = st.date_input("Viewing month", value=today().replace(day=1), key="viewing_month", help="Choose any day in the month you want to explore.")
     month = selected_date.strftime("%Y-%m")
@@ -720,7 +721,7 @@ def validate_session():
         logout()
 
 
-PAGES = {"Overview":dashboard, "Transactions":transactions_page, "Budgets":budgets_page, "Groups":groups_page, "Insights":insights_page, "Savings goals":goals_page, "SpendGenie":spendgenie_page, "Settings":settings_page}
+PAGES = {"Overview":dashboard, "Transactions":transactions_page, "Personal spendings":lambda month: render_personal_spendings(store,uid,month), "Budgets":budgets_page, "Groups":groups_page, "Insights":insights_page, "Savings goals":goals_page, "SpendGenie":spendgenie_page, "Settings":settings_page}
 
 
 try:

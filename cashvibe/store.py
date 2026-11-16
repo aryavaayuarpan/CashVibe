@@ -218,7 +218,12 @@ def _public_user(row: Any) -> dict:
     return {key: row[key] for key in ("id", "name", "email", "auth_version")}
 
 
-class Store:
+from cashvibe.statement_store import StatementMixin, define_statement_tables
+
+define_statement_tables(metadata)
+
+
+class Store(StatementMixin):
     """Thread-safe facade; each operation obtains its own DB transaction."""
 
     def __init__(self, database_url: str | None = None):

@@ -39,3 +39,11 @@ The managed test computer's Chromium did not trust its HTTPS inspection CA direc
 ## Operating limits
 
 Render Free can sleep after inactivity; Supabase Free can pause after extended inactivity. Groq Free has rate limits. Shared changes refresh while the relevant page is open; background push notifications are not included. Keep recovery keys private and back up important records.
+
+## Personal spendings update — 2026-11-16
+
+- 60 automated tests pass, including real synthetic searchable/encrypted PDF extraction, scanned-page OCR, CSV mapping/errors and spreadsheet formula escaping.
+- Statement storage tests verify user isolation, exact-file and overlapping-row duplicate handling, atomic rollback, transfer exclusions, amount/date matching and ledger/shared reconciliation without adding duplicate expenses.
+- SpendGenie statement-tool tests verify date filtering, account scope and removal of long numeric/VPA identifiers from descriptions.
+- Docker build succeeds with local Tesseract installed. The managed build uses its local proxy CA as a temporary BuildKit secret; production Dockerfile uses standard TLS trust. The local sandbox lacked space for a second container filesystem, so runtime browser checks use the same Python source environment; GitHub CI checks the production image build.
+- Parsing is bank-independent but layout-dependent. Review and completeness confirmation are mandatory. Unknown app attribution remains explicit; arbitrary bank layouts and OCR accuracy are not guaranteed.

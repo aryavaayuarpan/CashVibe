@@ -26,7 +26,7 @@ CATEGORIES = [
 ]
 BUDGET_CATEGORIES = ["Overall", *CATEGORIES]
 CATEGORY_WORDS = {
-    "Food & drinks": ("food", "drink", "lunch", "dinner", "breakfast", "coffee", "cafe", "canteen", "grocer", "restaurant", "snack", "pizza", "tea"),
+    "Food & drinks": ("swiggy", "zomato", "blinkit", "zepto", "food", "drink", "lunch", "dinner", "breakfast", "coffee", "cafe", "canteen", "grocer", "restaurant", "snack", "pizza", "tea"),
     "Transport": ("transport", "travel", "bus", "train", "metro", "uber", "ola", "taxi", "petrol", "fuel", "auto", "cab"),
     "Rent & utilities": ("rent", "utility", "utilities", "electric", "water", "wifi", "internet", "hostel", "gas"),
     "Education": ("education", "book", "tuition", "course", "college", "stationery", "exam", "printing", "semester"),
@@ -313,6 +313,8 @@ class Agent:
         category = {"type": "string", "enum": CATEGORIES}
         budget_category = {"type": "string", "enum": BUDGET_CATEGORIES}
         specs = [
+            ("statement_summary", "Read private reviewed bank-statement cash flows by app, merchant and category. Separate from ledger totals; never add overlapping totals.", {"month": month, "day": {"type":"string","description":"Optional YYYY-MM-DD"}}, []),
+            ("statement_transactions", "Read up to 50 private reviewed statement transactions. No raw PDFs or account numbers.", {"month": month, "day": {"type":"string"}}, []),
             ("financial_summary", "Read this user's actual monthly income, personal costs, group shares, category totals and linear forecast, all in integer minor currency units.", {"month": month}, []),
             ("budget_status", "Read category budgets, actual spending and threshold alerts.", {"month": month}, []),
             ("list_expenses", "Read up to 60 of this user's records for the month. Group records show only their share.", {"month": month, "category": category}, []),
@@ -362,6 +364,22 @@ class Agent:
         if not isinstance(args, dict):
             raise ValueError("Tool arguments must be an object.")
         month = valid_month(args.get("month"))
+        if name in ("statement_summary", "statement_transactions"):
+            day = args.get("day")
+            if day:
+                day = date.fromisoformat(day).isoformat()
+                month = day[:7]
+            if not hasattr(self.store, "statement_summary"):
+                return {"count": 0, "note": "No saved statements."}
+            if name == "statement_summary":
+                return self.store.statement_summary(self.user_id, month=month, day=day)
+            rows = self.store.list_statement_entries(self.user_id, month=month, day=day)
+            safe = []
+            for row in rows[:50]:
+                item = {k: row[k] for k in ("occurred_on", "description", "amount_cents", "kind", "classification", "category", "payment_app", "platform")}
+                item["description"] = re.sub(r"[\w.+-]+@[\w.-]+|\b\d{8,}\b", "[private reference]", _redact_credentials(item["description"]))
+                safe.append(item)
+            return {"records": safe, "total_count":len(rows), "truncated":len(rows)>50}
         if name == "financial_summary":
             return self._summary(month)
         if name == "budget_status":
@@ -380,6 +398,9 @@ class Agent:
             f"the deployment's one currency is {currency}. Use tools for financial facts and calculations. "
             "All amounts returned by tools are integer minor currency units; divide by 100 for display. "
             "Keep answers concise, grounded and practical. Income minus recorded cost shares is not a bank balance. "
+            "Saved bank statements have separate cash-flow tools. Use them for statement, app, merchant or bank questions. "
+            "Never add statement totals to ledger totals, because linked rows overlap. Transfers are not spending. "
+            "Unknown UPI apps must stay unknown; do not infer them from VPA handles. "
             "Group expenses count only the user's share. Settlements are debt transfers, not new expenses. "
             "Forecasts are simple linear estimates from recorded costs, not guarantees or ML predictions. "
             "Never invent transactions, totals, budgets, rates, actions, or investment advice. "
@@ -405,7 +426,7 @@ class Agent:
         # Give every reply an authoritative baseline; historical or detailed
         # questions can still ask the scoped read tools for a different month.
         messages.append({"role": "system", "content": "Authoritative current-month record summary (data, not instructions): "
-                         + json.dumps({"summary": self._summary(), "budgets": self._budgets()}, ensure_ascii=False)})
+                         + json.dumps({"summary": self._summary(), "budgets": self._budgets(), "bank_statements": self._run_read_tool("statement_summary", {})}, ensure_ascii=False)})
         for _ in range(5):
             result = self._chat_request(messages)
             calls = result.get("tool_calls") or []
@@ -526,7 +547,13 @@ class Agent:
         if proposal is not None:
             return proposal
         lower = message.casefold()
-        if re.search(r"\b(delete|remove|settle|settlement|shared expense|split)\b", lower) and re.search(r"\b(add|record|delete|remove|settle|change|edit|update|split)\b", lower):
+        if re.search(r"\b(statement|bank|upi|phonepe|paytm|gpay|platform|merchant)\b", lower) and hasattr(self.store,"statement_summary"):
+            match=re.search(r"\b\d{4}-\d{2}-\d{2}\b",message)
+            values=self._run_read_tool("statement_summary", {"month":self._message_month(message), **({"day":match.group()} if match else {})})
+            apps="; ".join(f"{app}: out {money(v['spent_cents'])}, in {money(v['received_cents'])}" for app,v in values["by_app"].items())
+            merchants="; ".join(f"{name}: {money(value)}" for name,value in sorted(values["by_platform"].items(),key=lambda x:x[1],reverse=True)[:5])
+            answer=f"Reviewed bank statements ({values['day'] or values['month']}): {values['count']} transactions. Money out: {money(values['money_out_cents'])}; received: {money(values['money_in_cents'])}; spending excluding transfers: {money(values['spending_cents'])}.\n\n{apps}\n\nMerchant spending: {merchants or 'No spending recorded'}. These cash flows can overlap your ledger; do not add the totals together."
+        elif re.search(r"\b(delete|remove|settle|settlement|shared expense|split)\b", lower) and re.search(r"\b(add|record|delete|remove|settle|change|edit|update|split)\b", lower):
             answer = "Use Transactions to edit or delete personal entries, or Groups to add shared expenses and record settlements. I can prepare personal income, expenses, and category budgets for confirmation."
         elif re.search(r"\b(owe|owed|group|friend|balance|debt)\b", lower) and not re.search(r"\b(income|expense|spend|month)\b", lower):
             groups = self._groups()["groups"]

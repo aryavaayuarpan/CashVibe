@@ -137,3 +137,18 @@ def test_password_recovery_revokes_existing_app_session(app):
     clean(at)
     assert any(button.label == "Sign in →" for button in at.button)
     assert not any(button.key == "sidebar_signout" for button in at.button)
+
+
+def test_personal_spendings_saved_analysis_and_ledger_connection(app):
+    from cashvibe.statement_parser import enrich
+    at,persistence=app
+    user,_=signup(at)
+    persistence.save_statement_import(user['id'],'November statement','a'*64,[enrich(dict(occurred_on='2026-11-15',description='PhonePe Swiggy',amount_cents=25000,kind='expense'))])
+    at.radio(key='navigation').set_value('Personal spendings').run()
+    clean(at)
+    assert any(m.label=='Money out' and '250' in m.value for m in at.metric)
+    labeled(at.radio,'Connection').set_value('Add to ledger').run()
+    clean(at)
+    labeled(at.button,'Confirm connection').click().run()
+    clean(at)
+    assert len(persistence.list_transactions(user['id']))==1
