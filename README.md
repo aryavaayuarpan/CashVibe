@@ -1,5 +1,7 @@
 # CashVibe
 
+TEAM MEMBER - ARPAN YADAV(2400320100273)[CSE 15] ; ARUN KUMAR RAIDAS (2400320100282) [CSE15];
+
 **Student money, in sync.** A Docker-ready Streamlit expense tracker with personal records, monthly budgets, shared group expenses, settlements, financial insights, and SpendGenie.
 
 **Live application: [cashvibe-ckpv.onrender.com](https://cashvibe-ckpv.onrender.com)**
